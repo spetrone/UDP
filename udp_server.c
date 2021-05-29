@@ -22,7 +22,7 @@ int main()
 	int count = 0;
 	char recBuf[MAXLEN];
 	int bindStatus = -1;
-	socklen_t sockSize; //used for sendto and recfrom
+	int addrLen = sizeof(struct sockaddr_in); //used for sendto and recfrom
 
  	//create socket
 	if((sockid = socket(PF_INET, SOCK_DGRAM, 0)) == -1)
@@ -49,27 +49,25 @@ int main()
 	for(;;)
 	{
 		memset(recBuf, '\0', sizeof(recBuf));
-		sockSize = sizeof(clientAddr);
-		if (count = recvfrom(sockid, recBuf, sizeof(recBuf), 0, (struct sockaddr *)&clientAddr, sockSize) < 0)
+		if (count = recvfrom(sockid, recBuf, sizeof(recBuf), 0, (struct sockaddr *)&clientAddr,(socklen_t *)&addrLen) < 0)
 		{
 			perror("Error with recFrom(): ");
 			return -1;
 		}
 		else
-			printf("\nReceived %d bytes from client\n", count);
+			printf("\nReceived %lu bytes from client\n", strlen(recBuf));
 
 		//print echo message
 		printf("\n\nECHO message: \n %s \n", recBuf);
 
 		//echo message back to client
-		sockSize = sizeof(clientAddr);
-		if (count = sendto(sockid, recBuf, sizeof(recBuf), 0, (struct sockaddr *)&clientAddr, sockSize) < 0)
+		if ((count = sendto(sockid, recBuf, sizeof(recBuf), 0, (struct sockaddr *)&clientAddr, addrLen)) < 0)
 		{
 			perror("Error with sendTo(): ");
 			return -1;
 		}
 		else
-			printf("\nSent  %d bytes from client\n", count);
+			printf("\nSent  %d bytes to client\n", count);
 
 
 
